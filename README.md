@@ -40,6 +40,54 @@ cd spring-boot-build-image
 mvn clean spring-boot:build-image -X
 ```
 
+#### 🔍 How `mvn spring-boot:build-image` Works
+
+1. **Detects the Application Type**
+   - Determines if it's a Java application.
+2. **Chooses a Base Image (Builder)**
+   - By default, it selects `paketobuildpacks/builder-jammy-java-tiny`.
+   - This can be changed using the `builder` configuration in `pom.xml`.
+3. **Builds the Image Using Buildpacks**
+   - Uses Paketo Buildpacks to create an optimized Docker image.
+4. **Tags the Image**
+   - The image is tagged as `test/myapp-test:latest`.
+
+#### 📌 Customizing the Builder Image
+
+Modify `pom.xml` to specify a different builder:
+
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+                <image>
+                    <name>test/myapp-test:latest</name>
+                </image>
+                <builder>paketobuildpacks/builder:base</builder>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+Other available builder images:
+
+| Builder | Base Image | Description |
+|---------|-----------|-------------|
+| `paketobuildpacks/builder:base` | Ubuntu (Jammy) | Default for most Java apps |
+| `paketobuildpacks/builder:full` | Ubuntu (Jammy) | Includes all dependencies |
+| `paketobuildpacks/builder:tiny` | Minimal Ubuntu | Smallest possible image |
+| `gcr.io/paketo-buildpacks/builder` | Google Container Registry | Alternative option |
+
+To force a specific builder:
+
+```sh
+mvn spring-boot:build-image -Dspring-boot.build-image.builder=paketobuildpacks/builder:full
+```
+
 ### 3️⃣ Verify the Docker Image
 ```sh
 docker images
@@ -112,4 +160,3 @@ If you have any issues, feel free to **open an issue** on GitHub!
 
 ---
 🔗 **GitHub Repository:** [https://github.com/GANESH-A0508/spring-boot-build-image](https://github.com/GANESH-A0508/spring-boot-build-image)
-
