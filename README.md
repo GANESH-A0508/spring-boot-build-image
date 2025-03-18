@@ -1,6 +1,6 @@
 # Spring Boot Build Image with Cloud Native Buildpacks
 
-This repository demonstrates how to create a Spring Boot application, package it using Cloud Native Buildpacks with the `spring-boot-maven-plugin` dependency, and run it using Docker.
+This repository demonstrates how to create a Spring Boot application, package it using Cloud Native Buildpacks with the `spring-boot-maven-plugin`, and run it using Docker.
 
 ## 🚀 Features
 
@@ -14,10 +14,10 @@ This repository demonstrates how to create a Spring Boot application, package it
 
 Ensure you have the following installed:
 
-- Java 17 [(Download)](https://adoptium.net/)
-- Maven 3+ [(Download)](https://maven.apache.org/download.cgi)
-- Docker [(Download)](https://www.docker.com/get-started)
-- Git [(Download)](https://git-scm.com/downloads)
+- Java 17 [(Download)](https://adoptium.net/) ☕
+- Maven 3+ [(Download)](https://maven.apache.org/download.cgi) 📦
+- Docker [(Download)](https://www.docker.com/get-started) 🐳
+- Git [(Download)](https://git-scm.com/downloads) 🔗
 
 ## 📂 Project Structure
 
@@ -47,20 +47,20 @@ mvn clean spring-boot:build-image -X
 
 ## 🔍 How `mvn spring-boot:build-image` Works
 
-### 1️⃣ Detects the Application Type
+1️⃣ **Detects the Application Type** 🧐
 
 - Determines if it's a Java application.
 
-### 2️⃣ Chooses a Base Image (Builder)
+2️⃣ **Chooses a Base Image (Builder)** 🏗️
 
 - By default, it selects `paketobuildpacks/builder-jammy-java-tiny`.
 - This can be changed using the builder configuration in `pom.xml`.
 
-### 3️⃣ Builds the Image Using Buildpacks
+3️⃣ **Builds the Image Using Buildpacks** 🔨
 
 - Uses Paketo Buildpacks to create an optimized Docker image.
 
-### 4️⃣ Tags the Image
+4️⃣ **Tags the Image** 🏷️
 
 - The image is tagged as `test/myapp-test:latest`.
 
@@ -85,22 +85,9 @@ Modify `pom.xml` to specify a different builder:
 </build>
 ```
 
-### Available Builder Images
+## 🎯 Verifying and Pushing the Docker Image
 
-| Builder                            | Base Image                | Description                |
-| ---------------------------------- | ------------------------- | -------------------------- |
-| `paketobuildpacks/builder:base`    | Ubuntu (Jammy)            | Default for most Java apps |
-| `paketobuildpacks/builder:full`    | Ubuntu (Jammy)            | Includes all dependencies  |
-| `paketobuildpacks/builder:tiny`    | Minimal Ubuntu            | Smallest possible image    |
-| `gcr.io/paketo-buildpacks/builder` | Google Container Registry | Alternative option         |
-
-To force a specific builder:
-
-```sh
-mvn spring-boot:build-image -Dspring-boot.build-image.builder=paketobuildpacks/builder:full
-```
-
-### 3️⃣ Verify the Docker Image
+### 1️⃣ Verify the Docker Image 🔍
 
 ```sh
 docker images
@@ -115,7 +102,7 @@ test/myapp-test                            latest    d48c03bc3a98   Just now    
 paketobuildpacks/builder-jammy-java-tiny   latest    13144ab1719e   45 years ago   998MB
 ```
 
-### 4️⃣ Test the API
+### 2️⃣ Test the API 🔥
 
 Open your browser or use cURL:
 
@@ -129,35 +116,113 @@ Expected response:
 Getting started with Maven build image!!!!
 ```
 
-## 📌 Publishing the Docker Image using docker push
+### 3️⃣ Push the Docker Image to Docker Hub 🚀
 
-### 1️⃣ Login to Docker Hub
+Ensure you're logged into Docker Hub:
 
 ```sh
 docker login
 ```
 
-### 2️⃣ Tag the Image
+Tag the image:
 
 ```sh
 docker tag test/myapp-test:latest your-dockerhub-username/myapp-test:latest
 ```
 
-### 3️⃣ Push the Image
+Push the image:
 
 ```sh
 docker push your-dockerhub-username/myapp-test:latest
 ```
 
-### 4️⃣ Verify in Docker Hub
+✅ **Verify in Docker Hub:**
 
-- Go to [Docker Hub](https://hub.docker.com/)
-- Check if your image appears under **Repositories**.
+- 🔗 Go to [Docker Hub](https://hub.docker.com/)
+- 🔍 Check if your image appears under **Repositories**.
 
-### Check my images pushed in Docker Hub
-- Go to [Docker Hub](https://hub.docker.com/repositories/ramyabarigela143)
+## 📌 Automating Image Build and Push in Maven
+
+To build and push the image in a single `mvn install` run, update `pom.xml`:
+
+```xml
+<build>
+    <plugins>
+        <!-- Spring Boot Build Image Plugin -->
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+                <image>
+                    <name>docker-username/spring-boot-build-image</name>
+                </image>
+            </configuration>
+            <executions>
+                <execution>
+                    <id>build-image</id>
+                    <goals>
+                        <goal>build-image</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+
+        <!-- Docker Push Plugin -->
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.0.0</version>
+            <executions>
+                <execution>
+                    <id>docker-push</id>
+                    <phase>install</phase>
+                    <goals>
+                        <goal>exec</goal>
+                    </goals>
+                    <configuration>
+                        <executable>docker</executable>
+                        <arguments>
+                            <argument>push</argument>
+                            <argument>docker-username/spring-boot-build-image</argument>
+                        </arguments>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
+```
+
+Now, follow below steps:
+
+✅ Step 1: Authenticate with Docker Hub
+Run the following command before building the image:
+
+```sh
+docker login -u username
+```
+Enter your Docker Hub password when prompted. Note if authentication fails, create a PAT(personal access token) from docker hub and enter this token in place of password.
+
+✅ Step 2: Run mvn clean install command
+
+```sh
+mvn clean install
+```
+
+It will:
+1️⃣ Compile and package the Java application. 📦
+2️⃣ Build the Docker image. 🏗️
+3️⃣ Push the image to Docker Hub automatically. 🚀
 
 ## 🛠 Troubleshooting
+
+### ❌ Issue: `docker: command not found`
+
+✅ Fix: Ensure Docker CLI is installed and available in the system `PATH`.
+
+```sh
+docker --version
+```
 
 ### ❌ Issue: Illegal char `:` at index 5: `npipe://...`
 
@@ -195,20 +260,12 @@ Ensure the following profile is set correctly:
 </profile>
 ```
 
-### ❌ Issue: `docker: command not found`
-
-✅ Fix: Ensure Docker CLI is installed and available in the system `PATH`.
-
-```sh
-docker --version
-```
-
 ## 📌 Contribution Guide
 
-1. Fork the repository.
-2. Create a new branch (`feature-branch`).
-3. Commit your changes.
-4. Push to your fork and create a Pull Request.
+1. Fork the repository. 🍴
+2. Create a new branch (`feature-branch`). 🌱
+3. Commit your changes. ✅
+4. Push to your fork and create a Pull Request. 🔃
 
 ## 💬 Need Help?
 
